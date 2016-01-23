@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.launching.macosx.MacOSXType/Java SE 8 [1.8.0_60]"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Couchbae Client 2.2.2"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Oracle Jdbc 6"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
