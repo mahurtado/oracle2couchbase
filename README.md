@@ -5,9 +5,9 @@
 From a set of Oracle database tables, extract the data and import them into a Couchbase database.
 Each row will be transformed to a JSON Document and stored in Cocuhbase.
 
-The program will do direct connection to Oracle and Couchbase. There are no extra import/export files in the process.
+The Java utility will do direct connection to Oracle and Couchbase. There are no extra import/export files in the process.
 
-To execute, use the libary **oracle2couchbase.jar** published in the release oh this repository. There are some external dependecies required explained below.
+To execute, use the libary **oracle2couchbase.jar** published in the [release](https://github.com/mahurtado/oracle2couchbase/releases) oh this repository. There are some external dependecies required explained below.
 
 ## Conventions
 
