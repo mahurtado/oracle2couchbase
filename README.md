@@ -22,6 +22,8 @@ To execute, use the libary **oracle2couchbase.jar** published in the [release](h
 
 ## Transformation Example
 
+![](https://github.com/mahurtado/oracle2couchbase/blob/master/oracle2couchbase_1.jpg)
+
 Oracle row in a table:
 
 location_id | street_address | postal_code | city	| state_province | country_id
