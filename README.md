@@ -11,7 +11,7 @@ To execute, use the libary **oracle2couchbase.jar** published in the [release](h
 
 ## Conventions
 
-* Each JSON Document will include a root-element equal to the name of the table
+* Each JSON Document will include a element named "type", equal to the name of the table. This element is used to distinguish between different kind of objects.
 * All the attribute names are lower-case
 * Couchbase is a key-value document database. The format of the **key** will be derived from the relational primary key as follows:
 
@@ -22,40 +22,16 @@ To execute, use the libary **oracle2couchbase.jar** published in the [release](h
 
 ## Transformation Example
 
-![](https://github.com/mahurtado/oracle2couchbase/blob/master/oracle2couchbase_1.jpg)
+![](https://github.com/mahurtado/oracle2couchbase/blob/master/oracle2couchbase_2.jpg)
 
-Oracle row in a table:
-
-location_id | street_address | postal_code | city	| state_province | country_id
------------ | -------------- | ----------- | ----	| -------------- | ----------
-1200 | 2017 Shinjuku-ku | 1689 | Tokyo | Tokyo Prefecture | JP
-**primary key** |
-
-JSON Document to be stored in Couchbase:
-
-**Key**
-```
-locations::1200
-```
-**Value** 
-```
-  "locations": {
-    "street_address": "2017 Shinjuku-ku",
-    "state_province": "Tokyo Prefecture",
-    "postal_code": "1689",
-    "city": "Tokyo",
-    "location_id": 1200,
-    "country_id": "JP"
-  }
-```
   
 ## Dependencies
 
-* **Couchbase Client Java SDK**. You can get it [here](http://developer.couchbase.com/documentation/server/4.0/sdks/java-2.2/download-links.html). 
-In particular the following libraries are required:
-  * couchbase-java-client-2.2.2.jar
-  * couchbase-core-io-1.2.2.jar
-  * rxjava-1.0.15.jar
+* **Couchbase Client Java SDK**. You can get it [here](http://developer.couchbase.com/documentation/server/4.1/sdks/java-2.2/download-links.html). 
+Check your SDK version. For example, for SDK 2.2.6, the following libraries are required:
+  * couchbase-java-client-2.2.6.jar
+  * couchbase-core-io-1.2.7.jar
+  * rxjava-1.0.17.jar
 * **Oracle thin driver**. Download from [here](http://www.oracle.com/technetwork/apps-tech/jdbc-112010-090769.html) - requires login -.
 You can also find thin driver in any Oracle database installation, under [ORACLE_HOME]/jdbc/lib. In particular the following library are required:
   * ojdbc6.jar
@@ -64,8 +40,8 @@ You can also find thin driver in any Oracle database installation, under [ORACLE
 
 Command line:
 ```
-java -cp [path_to]/oracle2couchbase.jar:[path_to]/couchbase-java-client-2.2.2.jar:[path_to]/couchbase-core-io-1.2.2.jar:
-[path_to]/rxjava-1.0.15.jar:[path_to]/ojdbc6.jar 
+java -cp [path_to]/oracle2couchbase.jar:[path_to]/couchbase-java-client-2.2.6.jar:[path_to]/couchbase-core-io-1.2.7.jar:
+[path_to]/rxjava-1.0.17.jar:[path_to]/ojdbc6.jar 
 -Dparameter1=value1 -Dparameter2=value2 ... com.oracle2couchbase.Loader
 ```
 
@@ -84,8 +60,8 @@ Parameters:
 Example:
 
 ```
-java -cp ./oracle2couchbase.jar:./lib/couchbase-java-client-2.2.2.jar:./lib/couchbase-core-io-1.2.2.jar:
-./lib/rxjava-1.0.15.jar:./lib/ojdbc6.jar 
+java -cp ./oracle2couchbase.jar:./lib/couchbase-java-client-2.2.6.jar:./lib/couchbase-core-io-1.2.7.jar:
+./lib/rxjava-1.0.17.jar:./lib/ojdbc6.jar 
 -DcbClusterAddress=couchbaseMachine -DcbBucketName=HR -DoraAddress=oracleMachine -DoraUser=HR -DoraPassword=oracle 
 -DoraService=XE -DoraTables=COUNTRIES,DEPARTMENTS,EMPLOYEES,JOBS,JOB_HISTORY,LOCATIONS,REGIONS com.oracle2couchbase.Loader
 ````
