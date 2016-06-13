@@ -38,12 +38,12 @@ public class Loader {
 		java.sql.Connection oraConn = null;
 		try {
 			oraConn = Connection.getOracleConnection();
-			String tables[] = Config.getInstance().getOraTables().split(",");
-
+			String tables[] = Config.getOraTables().split(",");
+ 
 			for(String table : tables){
 				getTableInfo(oraConn, table);
 				int insertedRows = processTable(oraConn, table);
-				log.log(Level.INFO,"TABLE " + table + " processed. " + insertedRows + " documents loaded");
+				log.log(Level.INFO, "TABLE " + table + " processed. " + insertedRows + " documents loaded");
 			}	
 			
 		} catch (Exception e) {
@@ -97,13 +97,14 @@ public class Loader {
 			Collections.sort(keyColumns);
 			tablePKColumns.put(tableName, keyColumns);
 			
-			log.log(Level.INFO,"TABLE " + tableName);
-			log.log(Level.INFO,"Columns");
-			log.log(Level.INFO,Arrays.toString(columns.toArray(new Column[0])));
-			log.log(Level.INFO,"PK_Columns");
-			log.log(Level.INFO,Arrays.toString(keyColumns.toArray(new PK_Column[0])));
+			log.log(Level.INFO, "TABLE " + tableName);
+			log.log(Level.INFO, "Columns");
+			log.log(Level.INFO, Arrays.toString(columns.toArray(new Column[0])));
+			log.log(Level.INFO, "PK_Columns");
+			log.log(Level.INFO, Arrays.toString(keyColumns.toArray(new PK_Column[0])));
 			
-		} catch (SQLException e) {
+		} catch (Exception e) {
+			log.log(Level.SEVERE, "Error processing table info: " + tableName);
 			e.printStackTrace();
 		}
 			
@@ -124,7 +125,8 @@ public class Loader {
 	        	bucket.insert(doc);
 	        	insertedRows++;
 	        }	
-		} catch (SQLException e) {
+		} catch (Exception e) {
+			log.log(Level.SEVERE, "Error processing table: " + tableName);
 			e.printStackTrace();
 		}
 		return insertedRows;
@@ -138,7 +140,8 @@ public class Loader {
 		for(Column column : columns){
 			value.put(column.getName().toLowerCase(), getJsonTypeObject(row, column.getIndex(), column.getType()));
 		}
-		return JsonObject.create().put(tableName.toLowerCase(), value);
+		value.put("type", tableName.toLowerCase());
+		return value;
 	}
 
 	private static String getKey(String tableName, ResultSet row) {
@@ -186,7 +189,8 @@ public class Loader {
 				res = row.getString(index);
 				break;
 			}
-		} catch (SQLException e) {
+		} catch (SQLException e) {			
+			log.log(Level.SEVERE, "Error processing object. index: " + index + "; type: " + type);
 			e.printStackTrace();
 		}
 		return res;

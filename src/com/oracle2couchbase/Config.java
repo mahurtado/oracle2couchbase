@@ -39,51 +39,47 @@ public class Config {
 		oraService = System.getProperty("oraService");
 		oraTables = System.getProperty("oraTables");
 		
-		log.log(Level.FINE, "Configuration loaded: "+ this.toString());
+		log.log(Level.INFO, "Configuration Loaded: "+ this.toString());
 	}
 
-	public static Config getInstance(){
-		return instance;
+	public static String getCbClusterAddress() {
+		return instance.cbClusterAddress;
 	}
 
-	public String getCbClusterAddress() {
-		return cbClusterAddress;
+	public static String getCbBucketName() {
+		return instance.cbBucketName;
 	}
 
-	public String getCbBucketName() {
-		return cbBucketName;
+	public static String getCbBucketPassword() {
+		return instance.cbBucketPassword;
 	}
 
-	public String getCbBucketPassword() {
-		return cbBucketPassword;
+	public static String getOraAddress() {
+		return instance.oraAddress;
 	}
 
-	public String getOraAddress() {
-		return oraAddress;
+	public static String getOraPort() {
+		return instance.oraPort;
 	}
 
-	public String getOraPort() {
-		return oraPort;
+	public static String getOraUser() {
+		return instance.oraUser;
 	}
 
-	public String getOraUser() {
-		return oraUser;
+	public static String getOraPassword() {
+		return instance.oraPassword;
 	}
 
-	public String getOraPassword() {
-		return oraPassword;
+	public static String getOraSid() {
+		return instance.oraSid;
 	}
 
-	public String getOraSid() {
-		return oraSid;
+	public static String getOraService() {
+		return instance.oraService;
 	}
 
-	public String getOraService() {
-		return oraService;
-	}
-
-	public String getOraTables() {
-		return oraTables;
+	public static String getOraTables() {
+		return instance.oraTables;
 	}
 
 	@Override
