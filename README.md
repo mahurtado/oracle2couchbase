@@ -18,7 +18,8 @@ To execute, use the libary **oracle2couchbase.jar** published in the [release](h
 `[table name in lower case]::[value of field1 of the PK]::[value of field 2 of the PK]:: ...`
 
 * Numeric, boolean and text data types will be preserved in the transformation
-* Oracle Date and Timestamps types will be stored in Couchbase as milliseconds since January 1, 1970, 00:00:00 GMT 
+* Oracle Date and Timestamps types will be stored in Couchbase as strings in ISO 8601 format.
+* Binary and LOB types (BLOB, CLOB, BINARY, VARBINARY, LONGVARBINARY) will be stored as strings Base64 encoded
 
 ## Transformation Example
 
