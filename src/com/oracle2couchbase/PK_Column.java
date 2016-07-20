@@ -72,8 +72,7 @@ public class PK_Column implements Comparable {
 		
 	@Override
 	public String toString() {
-		return "PK_Column [columnIndex=" + columnIndex + ", keyIndex=" + keyIndex + ", name=" + name + ", type=" + type
-				+ "]";
+		return "PK_Column [columnIndex=" + columnIndex + ", keyIndex=" + keyIndex + ", name=" + name + ", type=" + type + "]";
 	}
 	
 	@Override

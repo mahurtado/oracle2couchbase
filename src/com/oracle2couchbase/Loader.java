@@ -1,17 +1,25 @@
 package com.oracle2couchbase;
 
+import java.io.InputStream;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.sql.Types.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.document.JsonDocument;
@@ -22,12 +30,12 @@ public class Loader {
 	private static final Logger log = Logger.getLogger( Loader.class.getName() );
 	
 	public static final String KEY_SEPARATOR = "::";
-	
+	public static final int MAX_VALUE_SIZE = 20*1024*1024;
+	public static final int MAX_ERRORS = 50;
 	public static final int POS_COL_NAME = 4;
 	public static final int POS_COL_TYPE = 5;
 	public static final int POS_COL_DECIMALDIGITS = 9;
-	public static final int POS_COL_INDEX = 17;
-	
+	public static final int POS_COL_INDEX = 17;	
 	public static final int POS_KEY_COL_NAME = 4;
 	public static final int POS_KEY_COL_INDEX = 5;
 	
@@ -117,13 +125,26 @@ public class Loader {
 			String query = "SELECT * FROM " + tableName;
 			Statement stmt = oraConn.createStatement();
 	        ResultSet row = stmt.executeQuery(query);
+	        int numErrors = 0;
+	        String key = null;
 	        while (row.next()) {
-	        	String key = getKey(tableName, row);
-	        	JsonObject json = getJson(tableName, row);
-	        	log.log(Level.FINE, json.toString());
-	        	JsonDocument doc = JsonDocument.create(key, json);
-	        	bucket.insert(doc);
-	        	insertedRows++;
+	        	try {
+					key = getKey(tableName, row);
+					JsonObject json = getJson(tableName, row);
+					log.log(Level.FINE, json.toString());
+					JsonDocument doc = JsonDocument.create(key, json);
+					bucket.insert(doc);
+					insertedRows++;
+				} catch (Exception e) {
+					numErrors++;
+					e.printStackTrace();
+					log.log(Level.SEVERE, "Error processing row. key: " + key);
+					if(numErrors >= MAX_ERRORS){
+						log.log(Level.SEVERE, "Maximum number of errors reached. Exiting.");
+						break;
+					}
+				}
+	        	
 	        }	
 		} catch (Exception e) {
 			log.log(Level.SEVERE, "Error processing table: " + tableName);
@@ -153,21 +174,38 @@ public class Loader {
 		return sbKey.toString();
 	}
 	
+	private static String getISO8601String(Date date) {
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+		dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+		return dateFormat.format(date);
+	}
+	
 	private static Object getJsonTypeObject(ResultSet row, int index, int type){
 		Object res = null;
 		try {
+			if(row.getObject(index) == null)
+				return null;
+			
 			switch(type) {
-			case Types.DATE:
-				res = row.getDate(index).getTime();
+			case Types.CHAR:
+			case Types.VARCHAR:
+			case Types.LONGVARCHAR:
+			case Types.NCHAR:
+			case Types.NVARCHAR:
+				res = row.getString(index);
 				break;
+			// ISO 8601
+			case Types.DATE:
 			case Types.TIME:
 			case Types.TIME_WITH_TIMEZONE:
-				res = row.getTime(index).getTime();
-				break;
 			case Types.TIMESTAMP:	
+			case Types.TIMESTAMP_WITH_TIMEZONE:
+				res = getISO8601String(row.getDate(index));
+				break;
+			/*case Types.TIMESTAMP:	
 			case Types.TIMESTAMP_WITH_TIMEZONE:	
 				res = row.getTimestamp(index).getTime();
-				break;
+				break;*/
 			case Types.BOOLEAN:
 				res = row.getBoolean(index);
 				break;
@@ -185,11 +223,38 @@ public class Loader {
 			case Types.DOUBLE:
 				res = row.getDouble(index);
 				break;
-			default:	
-				res = row.getString(index);
+			// Binary types stored as Base64 strings
+			// RAW/LONGRAW
+			case Types.BINARY:
+			case Types.VARBINARY:
+			case Types.LONGVARBINARY:
+				res = Base64.getEncoder().encodeToString(row.getBytes(index));
 				break;
+			// BLOB
+			case Types.BLOB:
+				Blob blob = row.getBlob(index);
+				long size = blob.length();
+				if(size > MAX_VALUE_SIZE)
+					throw new Exception("BLOB value exceed 20 Mb");
+				res = Base64.getEncoder().encodeToString(blob.getBytes(1l, (int)size));
+				blob.free();
+				break;
+			// CLOB
+			case Types.CLOB:
+				Clob clob = row.getClob(index);
+				long c_size = clob.length();
+				if(c_size > MAX_VALUE_SIZE)
+					throw new Exception("CLOB value exceed 20 Mb");
+				res = clob.getSubString(1, (int)c_size);
+				clob.free();
+				break;
+			default:	
+				//res = row.getString(index);
+				//break;
+				throw new Exception("UNSUPPORTED TYPE: " + type);
 			}
-		} catch (SQLException e) {			
+		} 
+		catch (Exception e) {			
 			log.log(Level.SEVERE, "Error processing object. index: " + index + "; type: " + type);
 			e.printStackTrace();
 		}
